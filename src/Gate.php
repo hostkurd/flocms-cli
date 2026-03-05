@@ -14,7 +14,8 @@ final class Gate
 
     public function __construct($data){
         $this->Command = $data;
-        $this->AllCommands = $jsonData['cli-data']['all-commands'];
+        $jsdata = json_decode(file_get_contents(__DIR__."/data.json"), true);
+        $this->AllCommands = $jsdata['cli-data']['all-commands'];
     }
 
     public function Execute(): void{

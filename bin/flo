@@ -1,7 +1,31 @@
 #!/usr/bin/env php
 <?php
 
-require __DIR__.'/../vendor/autoload.php';
+$autoloadCandidates = [
+    // When installed as a dependency: <project>/vendor/hostkurd/flocms-cli/bin/flo
+    // -> <project>/vendor/autoload.php
+    __DIR__ . '/../../../autoload.php',
+
+    // When developing/running flocms-cli as a standalone package
+    __DIR__ . '/../vendor/autoload.php',
+];
+
+$autoloadPath = null;
+foreach ($autoloadCandidates as $candidate) {
+    if (is_file($candidate)) {
+        $autoloadPath = $candidate;
+        break;
+    }
+}
+
+if (!$autoloadPath) {
+    fwrite(STDERR, "FloCMS CLI error: Composer autoload.php not found.\n");
+    fwrite(STDERR, "Tried:\n - " . implode("\n - ", $autoloadCandidates) . "\n");
+    fwrite(STDERR, "Run: composer install\n");
+    exit(1);
+}
+
+require $autoloadPath;
 
 use FloCMS\CLI\Gate;
 

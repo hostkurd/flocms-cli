@@ -13,7 +13,7 @@ class Core{
 
     public function __construct($command, $Data)
     {
-        $this->Command = $Command;
+        $this->Command = $command;
         $this->Data = $Data;
         
         $jsonData = $this->Data;

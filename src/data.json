@@ -3,8 +3,8 @@
     {
         "dummy-texts":
         {
-            "controller-text":"<?php\nclass %sController extends Controller{\n\tpublic function __construct(array $data = array())\n\t{\n\t\tparent::__construct($data);\n\t\t$this->model = new %sModel();\n\t}\n}",
-            "model-text":"<?php\nclass %sModel extends Model{\n\n}",
+            "controller-text":"<?php\nnamespace FloCMS\\Controllers;\n\nuse FloCMS\\Core\\Controller;\n\nclass %sController extends Controller{\n\tpublic function __construct(array $data = array())\n\t{\n\t\tparent::__construct($data);\n\t\t$this->model = new %sModel();\n\t}\n}",
+            "model-text":"<?php\nnamespace FloCMS\\Models;\n\nuse FloCMS\\Core\\Model;\n\nclass %sModel extends Model{\n\n}",
             "view-text":"<div class=\"flo-wrapper\">\n\t<p> This is %s Page for %s</p> \n</div>",
             "method-text":"public function %s(){\n\t\t$this->data['title'] = 'Page Title Here';\n\t}"
         },
