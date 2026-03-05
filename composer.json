@@ -1,0 +1,33 @@
+{
+    "name": "hostkurd/flocms-cli",
+    "description": "Command line interface for FloCMS",
+    "type": "library",
+    "license": "MIT",
+
+    "authors": [
+        {
+            "name": "HostKurd"
+        }
+    ],
+
+    "autoload": {
+        "psr-4": {
+            "FloCMS\\CLI\\": "src/"
+        }
+    },
+
+    "bin": [
+        "bin/flo"
+    ],
+
+    "require": {
+        "php": "^8.0"
+    },
+
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+
+    "support": {
+        "source": "https://github.com/hostkurd/flocms-cli"
+    }
+}
