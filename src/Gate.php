@@ -32,24 +32,16 @@ final class Gate
         
         if (isset($this->Command[1])){
             switch($this->Command[1]){
-                case '--v':
-                    echo 'Version 1.8';
-                    break;
-                case '--help':
-                    echo $Core -> ShowAllCommands();
-                    break;
-                case 'create:controller':
-                    echo $Core -> CreateController();
-                    break;
-                case 'create:model':
-                    echo $Core -> CreateModel();
-                    break;
-                case 'create:view':
-                    echo $Core -> CreateView();
-                    break;
-                case 'create:route':
-                    echo $Core -> CreateRoute();
-                    break;
+                case '--v':               echo 'Version 1.8'; break;
+                case '--help':            echo $Core -> ShowAllCommands(); break;
+                case 'create:controller': echo $Core -> CreateController(); break;
+                case 'create:model':      echo $Core -> CreateModel(); break;
+                case 'create:view':       echo $Core -> CreateView(); break;
+                case 'create:route':      echo $Core -> CreateRoute(); break;
+                case 'delete:controller': echo $Core->DeleteController(); break;
+                case 'delete:model':      echo $Core->DeleteModel(); break;
+                case 'delete:view':       echo $Core->DeleteView(); break;
+                case 'delete:route':      echo $Core->DeleteRoute(); break;
                 default:
                     echo "Command not valid \r\nRun \"php flo --help\" to view available FloCMS Commands.";
                     break;
