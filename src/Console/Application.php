@@ -127,7 +127,8 @@ class Application
             try {
                 $input = ArgvParser::parse($tokens, self::globalDefinition(), $this->stdin);
             } catch (InputException $error) {
-                $this->output->error($error->getMessage());
+                ErrorRenderer::render($error, $this->output, true);
+                $this->output->error('Usage: flo <command> [options] [arguments]');
 
                 return Command::INVALID;
             }
@@ -144,7 +145,7 @@ class Application
         try {
             $command = $this->find($name);
         } catch (CommandNotFoundException $error) {
-            $this->output->error($error->getMessage());
+            ErrorRenderer::render($error, $this->output, true);
 
             return Command::FAILURE;
         }
@@ -171,17 +172,28 @@ class Application
                 return Command::SUCCESS;
             }
 
-            return $command->run($input, $output);
+            return self::exitCode($command->run($input, $output));
         } catch (InputException $error) {
-            $output->error($error->getMessage());
+            ErrorRenderer::render($error, $output, true);
             $output->error('Usage: ' . $this->usage($command));
+            $output->error('Run "flo ' . $command->getName() . ' --help" for the arguments and options.');
 
-            return Command::FAILURE;
+            return Command::INVALID;
+        } catch (CommandFailedException $error) {
+            ErrorRenderer::render($error, $output, true);
+
+            return $error->exitCode();
         } catch (Throwable $error) {
-            $output->error(get_class($error) . ': ' . $error->getMessage());
+            ErrorRenderer::render($error, $output);
 
             return Command::FAILURE;
         }
+    }
+
+    /** Exit codes are 0-255; anything else becomes 1. */
+    private static function exitCode(int $code): int
+    {
+        return $code >= 0 && $code <= 255 ? $code : Command::FAILURE;
     }
 
     /** "make:controller [options] [--] <name>" */

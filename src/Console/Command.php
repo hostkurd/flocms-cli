@@ -165,6 +165,12 @@ abstract class Command
         throw new InputException($message);
     }
 
+    /** Stop with an error message (no stack trace) and exit code 1. */
+    protected function fail(string $message, int $exitCode = self::FAILURE): never
+    {
+        throw new CommandFailedException($message, $exitCode);
+    }
+
     protected function line(string $text = ''): void
     {
         $this->output->writeln($text);
