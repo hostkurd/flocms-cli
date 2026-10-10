@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace FloCMS\CLI;
 
 use FloCMS\CLI\Commands\App;
+use FloCMS\CLI\Commands\CompleteCommand;
+use FloCMS\CLI\Commands\CompletionCommand;
 use FloCMS\CLI\Commands\App\KeyGenerateCommand;
 use FloCMS\CLI\Commands\Cache;
 use FloCMS\CLI\Commands\Db;
@@ -152,6 +154,8 @@ final class Kernel
             new Log\LogClearCommand(),
             new Log\LogRotateCommand(),
             new Log\StorageCheckCommand(),
+            new CompletionCommand(),
+            new CompleteCommand(),
             new Make\MakeControllerCommand(),
             new Make\MakeModelCommand(),
             new Make\MakeViewCommand(),
