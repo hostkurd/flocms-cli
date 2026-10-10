@@ -35,7 +35,10 @@ final class Option
         if ($shortcut !== null && preg_match('/^[A-Za-z]$/', $shortcut) !== 1) {
             throw new InvalidArgumentException('An option shortcut must be one letter, "' . $shortcut . '" given.');
         }
-        if ($this->isFlag() && $default !== null) {
+        if (($mode & self::VALUE_IS_ARRAY) === self::VALUE_IS_ARRAY && ($mode & self::VALUE_NONE) === self::VALUE_NONE) {
+            throw new InvalidArgumentException('A flag option (--' . $name . ') cannot be an array.');
+        }
+        if (($mode & self::VALUE_NONE) === self::VALUE_NONE && $default !== null) {
             throw new InvalidArgumentException('A flag option (--' . $name . ') cannot have a default value.');
         }
         $this->shortcut = $shortcut;
