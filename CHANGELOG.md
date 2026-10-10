@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.1 - Unreleased
+
+### Fixed
+- **Hidden input on Windows.** Password prompts (`user:create`,
+  `user:password`) ran PowerShell with `-NonInteractive`, where `Read-Host`
+  fails, so the prompt errored out or appeared to be skipped. PowerShell
+  now runs interactively; if hidden input still fails, the prompt says the
+  input will be visible and asks again.
+
 ## 2.0.0 - Unreleased
 
 A new architecture: one command kernel for FloCMS, its packages and the

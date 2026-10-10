@@ -161,6 +161,8 @@ final class Prompt
             if ($answer !== null) {
                 return $answer;
             }
+            $this->output->error('<comment>Hidden input is not available; what you type will be visible.</comment>');
+            $this->output->error($label . ' ', false);
         }
 
         $line = fgets($stream);
@@ -177,10 +179,7 @@ final class Prompt
     private static function readHidden($stream): ?string
     {
         if (DIRECTORY_SEPARATOR === '\\') {
-            // Windows: PowerShell reads from the console without echo
-            $command = 'powershell -NoProfile -NonInteractive -Command "$p = Read-Host -AsSecureString; '
-                . '[Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($p))"';
-            $value = function_exists('shell_exec') ? @shell_exec($command) : null;
+            $value = function_exists('shell_exec') ? @shell_exec(self::windowsHiddenCommand()) : null;
 
             return is_string($value) ? rtrim($value, "\r\n") : null;
         }
@@ -196,5 +195,16 @@ final class Prompt
         @shell_exec('stty ' . escapeshellarg(trim($mode)));
 
         return $line === false ? null : rtrim($line, "\r\n");
+    }
+
+    /**
+     * Windows: PowerShell reads from the console without echo. It must not run
+     * with -NonInteractive, which makes Read-Host fail. Its errors are dropped,
+     * so a failure falls back to a visible prompt instead of printing a stack.
+     */
+    public static function windowsHiddenCommand(): string
+    {
+        return 'powershell -NoProfile -Command "$p = Read-Host -AsSecureString; '
+            . '[Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($p))" 2>NUL';
     }
 }
