@@ -7,6 +7,7 @@ use FloCMS\CLI\Console\Command;
 use FloCMS\CLI\Console\Input\Argument;
 use FloCMS\CLI\Console\Input\Definition;
 use FloCMS\CLI\Core;
+use FloCMS\CLI\Support\Name;
 
 /**
  * The 1.x create:* and delete:* commands, run through the new kernel until
@@ -46,10 +47,11 @@ final class LegacyCommand extends Command
     protected function handle(): int
     {
         $command = ['flo', $this->name];
-        foreach (['name', 'view'] as $argument) {
-            if ($this->input->hasArgument($argument) && $this->input->argument($argument) !== null) {
-                $command[] = (string) $this->input->argument($argument);
-            }
+        if ($this->input->argument('name') !== null) {
+            $command[] = Name::validate((string) $this->input->argument('name'), 'controller name');
+        }
+        if ($this->input->hasArgument('view') && $this->input->argument('view') !== null) {
+            $command[] = Name::action((string) $this->input->argument('view'));
         }
         $data = json_decode((string) file_get_contents(dirname(__DIR__, 2) . '/data.json'), true);
         $core = new Core($command, $data, $this->project()->root());
