@@ -8,6 +8,7 @@ use FloCMS\CLI\Console\Input\Definition;
 use FloCMS\CLI\Console\Input\Input;
 use FloCMS\CLI\Console\Input\InputException;
 use FloCMS\CLI\Console\Input\Option;
+use FloCMS\CLI\Console\Output\Formatter;
 use FloCMS\CLI\Console\Output\Output;
 use FloCMS\CLI\Project;
 use Throwable;
@@ -175,7 +176,7 @@ class Application
             return self::exitCode($command->run($input, $output));
         } catch (InputException $error) {
             ErrorRenderer::render($error, $output, true);
-            $output->error('Usage: ' . $this->usage($command));
+            $output->error('Usage: ' . Formatter::escape($this->usage($command)));
             $output->error('Run "flo ' . $command->getName() . ' --help" for the arguments and options.');
 
             return Command::INVALID;
@@ -248,6 +249,11 @@ class Application
                 2 => Output::VERY_VERBOSE,
                 default => Output::DEBUG,
             });
+        }
+        if ($input->option('no-ansi')) {
+            $output->setDecorated(false);
+        } elseif ($input->option('ansi')) {
+            $output->setDecorated(true);
         }
         if ($input->option('no-interaction')) {
             $input->setInteractive(false);

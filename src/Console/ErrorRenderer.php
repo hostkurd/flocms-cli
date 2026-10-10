@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace FloCMS\CLI\Console;
 
+use FloCMS\CLI\Console\Output\Formatter;
 use FloCMS\CLI\Console\Output\Output;
 use Throwable;
 
@@ -20,7 +21,7 @@ final class ErrorRenderer
         }
 
         $output->error('');
-        $output->error(self::block('ERROR', $lines));
+        $output->error(self::block('ERROR', array_map([Formatter::class, 'escape'], $lines), $output->isErrorDecorated()));
 
         $debug = $output->isDebug() || self::appDebug();
         if (!$expected && ($output->isVerbose() || $debug)) {
@@ -44,8 +45,12 @@ final class ErrorRenderer
         $output->error('');
     }
 
-    /** @param list<string> $lines */
-    public static function block(string $label, array $lines): string
+    /**
+     * " [ERROR] message" lines; in color a full-width red block.
+     *
+     * @param list<string> $lines
+     */
+    public static function block(string $label, array $lines, bool $decorated = false): string
     {
         $prefix = ' [' . $label . '] ';
         $indent = str_repeat(' ', strlen($prefix));
@@ -53,8 +58,15 @@ final class ErrorRenderer
         foreach ($lines as $index => $line) {
             $text[] = ($index === 0 ? $prefix : $indent) . $line;
         }
+        if (!$decorated) {
+            return implode("\n", $text);
+        }
+        $width = max(array_map([Formatter::class, 'width'], $text)) + 1;
 
-        return implode(PHP_EOL, $text);
+        return implode("\n", array_map(
+            static fn (string $line): string => '<error>' . $line . str_repeat(' ', $width - Formatter::width($line)) . '</error>',
+            $text
+        ));
     }
 
     private static function appDebug(): bool

@@ -6,7 +6,11 @@ namespace FloCMS\CLI\Console;
 use FloCMS\CLI\Console\Input\Definition;
 use FloCMS\CLI\Console\Input\Input;
 use FloCMS\CLI\Console\Input\InputException;
+use FloCMS\CLI\Console\Output\Formatter;
 use FloCMS\CLI\Console\Output\Output;
+use FloCMS\CLI\Console\Output\ProgressBar;
+use FloCMS\CLI\Console\Output\Spinner;
+use FloCMS\CLI\Console\Output\Table;
 use FloCMS\CLI\Project;
 use LogicException;
 
@@ -171,14 +175,143 @@ abstract class Command
         throw new CommandFailedException($message, $exitCode);
     }
 
-    protected function line(string $text = ''): void
+    /** A line on STDOUT; style tags allowed (<info>, <comment>, <b>, ...). */
+    protected function line(string $text = '', int $verbosity = Output::NORMAL): void
     {
-        $this->output->writeln($text);
+        $this->output->writeln($text, $verbosity);
     }
 
+    protected function newLine(int $count = 1): void
+    {
+        for ($i = 0; $i < $count; $i++) {
+            $this->output->writeln();
+        }
+    }
+
+    protected function info(string $text): void
+    {
+        $this->output->writeln('<info>' . $text . '</info>');
+    }
+
+    protected function comment(string $text): void
+    {
+        $this->output->writeln('<comment>' . $text . '</comment>');
+    }
+
+    /** "[OK] message" in green. */
+    protected function success(string $text): void
+    {
+        $this->output->writeln('<success>[OK]</success> ' . $text);
+    }
+
+    /** "[WARNING] message" on STDERR. */
+    protected function warn(string $text): void
+    {
+        $this->output->diagnostic('<warning> WARNING </warning> ' . $text);
+    }
+
+    /** "! message" note in yellow. */
+    protected function note(string $text): void
+    {
+        $this->output->writeln('<comment>! ' . $text . '</comment>');
+    }
+
+    /** An error line on STDERR (shown even with --quiet). */
     protected function error(string $text): void
     {
-        $this->output->error($text);
+        $this->output->error('<error> ERROR </error> ' . $text);
+    }
+
+    protected function title(string $text): void
+    {
+        $this->output->writeln();
+        $this->output->writeln('<b>' . $text . '</b>');
+        $this->output->writeln('<b>' . str_repeat('=', Formatter::width($text)) . '</b>');
+        $this->output->writeln();
+    }
+
+    protected function section(string $text): void
+    {
+        $this->output->writeln();
+        $this->output->writeln('<comment>' . $text . '</comment>');
+        $this->output->writeln('<comment>' . str_repeat('-', Formatter::width($text)) . '</comment>');
+    }
+
+    /**
+     * @param list<string> $headers
+     * @param list<array<int|string, mixed>> $rows lists, or rows keyed by header
+     */
+    protected function table(array $headers, array $rows): void
+    {
+        foreach (Table::render($headers, $rows) as $line) {
+            $this->output->writeln($line);
+        }
+    }
+
+    /**
+     * Aligned "label  value" lines.
+     *
+     * @param array<string, mixed> $items
+     */
+    protected function definitionList(array $items): void
+    {
+        $width = 0;
+        foreach (array_keys($items) as $label) {
+            $width = max($width, Formatter::width((string) $label));
+        }
+        foreach ($items as $label => $value) {
+            $value = match (true) {
+                $value === null => '<muted>-</muted>',
+                $value === true => 'yes',
+                $value === false => 'no',
+                is_array($value) => implode(', ', array_map('strval', $value)),
+                default => (string) $value,
+            };
+            $this->output->writeln('  <info>' . $label . '</info>' . str_repeat(' ', $width - Formatter::width((string) $label) + 2) . $value);
+        }
+    }
+
+    protected function progress(int $max = 0): ProgressBar
+    {
+        return (new ProgressBar($this->output, $max))->start();
+    }
+
+    /**
+     * @template T
+     * @param callable(Spinner): T $work
+     * @return T
+     */
+    protected function spin(string $message, callable $work): mixed
+    {
+        return (new Spinner($this->output, $message))->run($work);
+    }
+
+    protected function prompt(): Prompt
+    {
+        return new Prompt($this->input, $this->output);
+    }
+
+    /** @param null|callable(string): (string|null) $validate */
+    protected function ask(string $question, ?string $default = null, ?callable $validate = null): string
+    {
+        return $this->prompt()->ask($question, $default, $validate);
+    }
+
+    /** Hidden input (passwords). */
+    protected function secret(string $question, ?callable $validate = null): string
+    {
+        return $this->prompt()->secret($question, $validate);
+    }
+
+    protected function confirm(string $question, bool $default = false): bool
+    {
+        return $this->prompt()->confirm($question, $default);
+    }
+
+    /** @param array<int|string, string> $choices */
+    protected function choice(string $question, array $choices, int|string|null $default = null): int|string
+    {
+        return $this->prompt()->choice($question, $choices, $default);
     }
 
     /**
