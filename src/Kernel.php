@@ -8,6 +8,7 @@ use FloCMS\CLI\Commands\App\KeyGenerateCommand;
 use FloCMS\CLI\Commands\Cache;
 use FloCMS\CLI\Commands\Db;
 use FloCMS\CLI\Commands\HelpCommand;
+use FloCMS\CLI\Commands\Lang;
 use FloCMS\CLI\Commands\ListCommand;
 use FloCMS\CLI\Commands\Make;
 use FloCMS\CLI\Commands\Route;
@@ -141,6 +142,8 @@ final class Kernel
             new User\UserRoleCommand(),
             ...User\UserStatusCommand::all(),
             new User\UserListCommand(),
+            new Lang\LangMissingCommand(),
+            new Lang\LangAddCommand(),
             new Make\MakeControllerCommand(),
             new Make\MakeModelCommand(),
             new Make\MakeViewCommand(),
