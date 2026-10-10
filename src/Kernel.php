@@ -12,6 +12,7 @@ use FloCMS\CLI\Commands\Lang;
 use FloCMS\CLI\Commands\ListCommand;
 use FloCMS\CLI\Commands\Make;
 use FloCMS\CLI\Commands\Route;
+use FloCMS\CLI\Commands\Schedule;
 use FloCMS\CLI\Commands\StubPublishCommand;
 use FloCMS\CLI\Commands\User;
 use FloCMS\CLI\Console\Application;
@@ -144,6 +145,8 @@ final class Kernel
             new User\UserListCommand(),
             new Lang\LangMissingCommand(),
             new Lang\LangAddCommand(),
+            new Schedule\ScheduleRunCommand(),
+            new Schedule\ScheduleListCommand(),
             new Make\MakeControllerCommand(),
             new Make\MakeModelCommand(),
             new Make\MakeViewCommand(),
