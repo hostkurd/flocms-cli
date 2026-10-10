@@ -1,0 +1,17 @@
+<?php
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use FloCMS\CLI\Console\Testing\ApplicationTester;
+use PHPUnit\Framework\TestCase;
+
+final class {{ class }} extends TestCase
+{
+    public function testTheApplicationListsItsCommands(): void
+    {
+        $tester = ApplicationTester::forProject(dirname(__DIR__, 2));
+
+        self::assertSame(0, $tester->run(['list']));
+    }
+}

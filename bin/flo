@@ -1,33 +1,26 @@
 #!/usr/bin/env php
 <?php
+declare(strict_types=1);
+
+// vendor/bin/flo. Projects normally run their root "flo" launcher instead,
+// which boots the same kernel: php flo <command>
 
 $autoloadCandidates = [
-    // When installed as a dependency: <project>/vendor/hostkurd/flocms-cli/bin/flo
-    // -> <project>/vendor/autoload.php
+    // Composer's bin proxy tells us where the autoloader is (Composer 2.2+)
+    $GLOBALS['_composer_autoload_path'] ?? null,
+    // Installed as a dependency: <project>/vendor/hostkurd/flocms-cli/bin/flo
     __DIR__ . '/../../../autoload.php',
-
-    // When developing/running flocms-cli as a standalone package
+    // Developing flocms-cli itself
     __DIR__ . '/../vendor/autoload.php',
 ];
 
-$autoloadPath = null;
-foreach ($autoloadCandidates as $candidate) {
-    if (is_file($candidate)) {
-        $autoloadPath = $candidate;
-        break;
+foreach (array_filter($autoloadCandidates) as $autoload) {
+    if (is_file($autoload)) {
+        require $autoload;
+        // <project>/vendor/autoload.php -> <project>
+        exit(FloCMS\CLI\Kernel::handle(dirname(realpath($autoload), 2), $argv));
     }
 }
 
-if (!$autoloadPath) {
-    fwrite(STDERR, "FloCMS CLI error: Composer autoload.php not found.\n");
-    fwrite(STDERR, "Tried:\n - " . implode("\n - ", $autoloadCandidates) . "\n");
-    fwrite(STDERR, "Run: composer install\n");
-    exit(1);
-}
-
-require $autoloadPath;
-
-use FloCMS\CLI\Gate;
-
-$gate = new Gate($argv);
-exit($gate->Execute());
+fwrite(STDERR, "FloCMS CLI: Composer's vendor/autoload.php not found. Run: composer install" . PHP_EOL);
+exit(1);

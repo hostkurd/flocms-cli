@@ -1,0 +1,33 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Commands;
+
+use FloCMS\CLI\Console\Command;
+use FloCMS\CLI\Console\Input\Argument;
+use FloCMS\CLI\Console\Input\Definition;
+use FloCMS\CLI\Console\Input\Option;
+
+/**
+ * Run with: php flo {{ command }}
+ */
+final class {{ class }} extends Command
+{
+    protected string $name = '{{ command }}';
+
+    protected string $description = 'Describe what {{ command }} does';
+
+    protected function configure(Definition $definition): void
+    {
+        $definition
+            ->argument('name', Argument::OPTIONAL, 'An example argument')
+            ->option('force', 'f', Option::VALUE_NONE, 'An example flag');
+    }
+
+    protected function handle(): int
+    {
+        $this->info('{{ command }} ran.');
+
+        return self::SUCCESS;
+    }
+}

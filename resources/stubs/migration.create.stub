@@ -1,0 +1,23 @@
+<?php
+declare(strict_types=1);
+
+use FloCMS\CLI\Database\Migration;
+use FloCMS\Core\Database;
+
+return new class extends Migration
+{
+    public function up(Database $db): void
+    {
+        $db->query('CREATE TABLE IF NOT EXISTS `{{ table }}` (
+            ' . $this->id($db) . ',
+            `name` VARCHAR(190) NOT NULL DEFAULT \'\',
+            `created_at` DATETIME NULL,
+            `updated_at` DATETIME NULL
+        )' . $this->tableOptions($db));
+    }
+
+    public function down(Database $db): void
+    {
+        $db->query('DROP TABLE IF EXISTS `{{ table }}`');
+    }
+};

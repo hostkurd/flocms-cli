@@ -1,0 +1,17 @@
+<?php
+declare(strict_types=1);
+
+namespace FloCMS\Controllers;
+
+use FloCMS\Core\Controller;{{ uses }}
+
+class {{ class }} extends Controller
+{{{ model }}
+    /**
+     * GET /{{ route }}
+     */
+    public function index(): void
+    {
+        $this->data['title'] = '{{ title }}';
+    }
+}
