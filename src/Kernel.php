@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace FloCMS\CLI;
 
+use FloCMS\CLI\Commands\App;
 use FloCMS\CLI\Commands\App\KeyGenerateCommand;
 use FloCMS\CLI\Commands\Db;
 use FloCMS\CLI\Commands\HelpCommand;
@@ -120,6 +121,12 @@ final class Kernel
             new ListCommand(),
             new HelpCommand(),
             new KeyGenerateCommand(),
+            new App\AboutCommand(),
+            new App\DoctorCommand(),
+            new App\ServeCommand(),
+            new App\DownCommand(),
+            new App\UpCommand(),
+            new App\EnvCheckCommand(),
             new Make\MakeControllerCommand(),
             new Make\MakeModelCommand(),
             new Make\MakeViewCommand(),

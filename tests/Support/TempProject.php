@@ -42,6 +42,28 @@ final class TempProject
         return (string) file_get_contents($this->path($relative));
     }
 
+    /**
+     * A minimal FloCMS site: front controllers, rewrite rules, writable
+     * directories, .env and .env.example.
+     */
+    public function skeleton(): void
+    {
+        $this->write('vendor/autoload.php', '<?php return require ' . var_export(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php', true) . ';');
+        $this->write('public/index.php', "<?php echo 'home:' . (\$_SERVER['REQUEST_URI'] ?? '');");
+        $this->write('public/api.php', "<?php header('Content-Type: application/json'); echo json_encode(['api' => \$_SERVER['REQUEST_URI'] ?? '']);");
+        $this->write('public/robots.txt', "User-agent: *\n");
+        $this->write('public/.htaccess', "RewriteEngine on\nRewriteRule ^(.*)$ index.php [PT,L]\n");
+        $this->write('.htaccess', "RewriteEngine on\nRewriteRule (.*) public/\$1 [L]\n");
+        foreach (['storage/logs', 'storage/cache', 'views/cache'] as $directory) {
+            if (!is_dir($this->path($directory))) {
+                mkdir($this->path($directory), 0777, true);
+            }
+        }
+        $env = "APP_NAME=Test\nAPP_ENV=local\nAPP_KEY=base64:dGVzdA==\nAPP_URL=http://localhost\nAPP_DEBUG=true\nLANGUAGES=en,ar\nDB_TYPE=sqlite\nDB_NAME=storage/database.sqlite\n";
+        $this->write('.env', $env);
+        $this->write('.env.example', preg_replace('/=.*$/m', '=', $env));
+    }
+
     /** Use a SQLite database in storage/ (.env DB_TYPE=sqlite). */
     public function sqlite(string $extraEnv = ''): void
     {
@@ -127,6 +149,9 @@ final class TempProject
 
     public function remove(): void
     {
+        // Release open SQLite connections first (Windows cannot delete open files)
+        \FloCMS\Core\App::$db = null;
+        gc_collect_cycles();
         self::delete($this->root);
     }
 
@@ -134,7 +159,7 @@ final class TempProject
     {
         if (is_link($path) || is_file($path)) {
             @chmod($path, 0666);
-            unlink($path);
+            @unlink($path);
 
             return;
         }
@@ -144,6 +169,6 @@ final class TempProject
         foreach (array_diff((array) scandir($path), ['.', '..']) as $item) {
             self::delete($path . DIRECTORY_SEPARATOR . $item);
         }
-        rmdir($path);
+        @rmdir($path);
     }
 }
