@@ -10,6 +10,7 @@ use FloCMS\CLI\Commands\Db;
 use FloCMS\CLI\Commands\HelpCommand;
 use FloCMS\CLI\Commands\Lang;
 use FloCMS\CLI\Commands\ListCommand;
+use FloCMS\CLI\Commands\Log;
 use FloCMS\CLI\Commands\Make;
 use FloCMS\CLI\Commands\Route;
 use FloCMS\CLI\Commands\Schedule;
@@ -147,6 +148,10 @@ final class Kernel
             new Lang\LangAddCommand(),
             new Schedule\ScheduleRunCommand(),
             new Schedule\ScheduleListCommand(),
+            new Log\LogTailCommand(),
+            new Log\LogClearCommand(),
+            new Log\LogRotateCommand(),
+            new Log\StorageCheckCommand(),
             new Make\MakeControllerCommand(),
             new Make\MakeModelCommand(),
             new Make\MakeViewCommand(),
