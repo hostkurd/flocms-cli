@@ -64,6 +64,18 @@ final class TempProject
         $this->write('.env.example', preg_replace('/=.*$/m', '=', $env));
     }
 
+    /** Copy a fixture directory from tests/Fixtures into the project. */
+    public function fixture(string $name): void
+    {
+        $source = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'Fixtures' . DIRECTORY_SEPARATOR . $name;
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source, \FilesystemIterator::SKIP_DOTS));
+        foreach ($iterator as $file) {
+            if ($file instanceof \SplFileInfo && $file->isFile()) {
+                $this->write(substr($file->getPathname(), strlen($source) + 1), (string) file_get_contents($file->getPathname()));
+            }
+        }
+    }
+
     /** Use a SQLite database in storage/ (.env DB_TYPE=sqlite). */
     public function sqlite(string $extraEnv = ''): void
     {

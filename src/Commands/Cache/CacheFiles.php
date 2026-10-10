@@ -122,5 +122,4 @@ final class CacheFiles
 
         return $removed;
     }
-
 }

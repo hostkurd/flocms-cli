@@ -10,6 +10,7 @@ use FloCMS\CLI\Commands\Db;
 use FloCMS\CLI\Commands\HelpCommand;
 use FloCMS\CLI\Commands\ListCommand;
 use FloCMS\CLI\Commands\Make;
+use FloCMS\CLI\Commands\Route;
 use FloCMS\CLI\Commands\StubPublishCommand;
 use FloCMS\CLI\Console\Application;
 use FloCMS\CLI\Console\Command;
@@ -132,6 +133,8 @@ final class Kernel
             new Cache\ViewClearCommand(),
             new Cache\OptimizeCommand(),
             new Cache\OptimizeClearCommand(),
+            new Route\RouteListCommand(),
+            new Route\PermissionListCommand(),
             new Make\MakeControllerCommand(),
             new Make\MakeModelCommand(),
             new Make\MakeViewCommand(),
