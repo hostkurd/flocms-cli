@@ -1,0 +1,37 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Api\Requests;
+
+use FloCMS\Api\Validation\Validator;
+use FloCMS\Core\Http\Request;
+
+/**
+ * Validation rules for one request, kept out of the controller:
+ *
+ *     $data = {{ class }}::validate($request);
+ *
+ * A failure is a 422 response with per-field errors.
+ */
+final class {{ class }}
+{
+    /** @return array<string, string|list<string>> */
+    public static function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:190',
+        ];
+    }
+
+    /** @return array<string, string> custom messages, e.g. ['name.required' => 'Please enter a name.'] */
+    public static function messages(): array
+    {
+        return [];
+    }
+
+    /** @return array<string, mixed> the validated input */
+    public static function validate(Request $request, ?Validator $validator = null): array
+    {
+        return ($validator ?? new Validator())->validateRequest($request, static::rules(), static::messages());
+    }
+}

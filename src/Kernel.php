@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace FloCMS\CLI;
 
-use FloCMS\CLI\Commands\Legacy\LegacyCommand;
 use FloCMS\CLI\Commands\App\KeyGenerateCommand;
 use FloCMS\CLI\Commands\HelpCommand;
 use FloCMS\CLI\Commands\ListCommand;
+use FloCMS\CLI\Commands\Make;
+use FloCMS\CLI\Commands\StubPublishCommand;
 use FloCMS\CLI\Console\Application;
 use FloCMS\CLI\Console\Command;
 use FloCMS\CLI\Console\Output\Output;
@@ -118,7 +119,21 @@ final class Kernel
             new ListCommand(),
             new HelpCommand(),
             new KeyGenerateCommand(),
-            ...LegacyCommand::all(),
+            new Make\MakeControllerCommand(),
+            new Make\MakeModelCommand(),
+            new Make\MakeViewCommand(),
+            new Make\MakeRouteCommand(),
+            new Make\MakeApiControllerCommand(),
+            new Make\MakeResourceCommand(),
+            new Make\MakeMiddlewareCommand(),
+            new Make\MakeRequestCommand(),
+            new Make\MakeMigrationCommand(),
+            new Make\MakeSeederCommand(),
+            new Make\MakeCommandCommand(),
+            new Make\MakeTestCommand(),
+            new Make\MakeModuleCommand(),
+            ...Make\DeleteCommand::all(),
+            new StubPublishCommand(),
         ];
     }
 }

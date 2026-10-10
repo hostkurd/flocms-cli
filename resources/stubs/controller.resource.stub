@@ -1,0 +1,72 @@
+<?php
+declare(strict_types=1);
+
+namespace FloCMS\Controllers;
+
+use FloCMS\Core\Controller;{{ uses }}
+
+class {{ class }} extends Controller
+{
+    /**
+     * Permission required per action, checked before the action runs.
+     */
+    protected array $actionPermissions = [
+        'admin_index' => '{{ permission }}.view',
+        'admin_add' => '{{ permission }}.create',
+        'admin_edit' => '{{ permission }}.update',
+        'admin_delete' => '{{ permission }}.delete',
+    ];
+{{ model }}
+    /**
+     * GET /{{ route }}
+     */
+    public function index(): void
+    {
+        $this->data['title'] = '{{ title }}';
+    }
+
+    /**
+     * GET /{{ route }}/view/{id}
+     */
+    public function view(): void
+    {
+        $id = (int) ($this->params[0] ?? 0);
+        $this->data['title'] = '{{ title }}';
+        $this->data['id'] = $id;
+    }
+
+    /**
+     * GET /admin/{{ route }}
+     */
+    public function admin_index(): void
+    {
+        $this->data['title'] = '{{ title }}';
+    }
+
+    /**
+     * GET|POST /admin/{{ route }}/add
+     */
+    public function admin_add(): void
+    {
+        $this->data['title'] = 'Add {{ title }}';
+    }
+
+    /**
+     * GET|POST /admin/{{ route }}/edit/{id}
+     */
+    public function admin_edit(): void
+    {
+        $id = (int) ($this->params[0] ?? 0);
+        $this->data['title'] = 'Edit {{ title }}';
+        $this->data['id'] = $id;
+    }
+
+    /**
+     * POST /admin/{{ route }}/delete/{id}
+     */
+    public function admin_delete(): void
+    {
+        $id = (int) ($this->params[0] ?? 0);
+        $this->data['id'] = $id;
+    }
+}

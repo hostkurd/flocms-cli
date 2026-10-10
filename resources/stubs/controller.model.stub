@@ -1,0 +1,9 @@
+
+    /**
+     * Created on first use, so actions that never query the database work
+     * before a database is set up.
+     */
+    protected function model(): {{ modelClass }}
+    {
+        return $this->model ??= new {{ modelClass }}();
+    }

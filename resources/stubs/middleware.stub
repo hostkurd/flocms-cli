@@ -1,0 +1,28 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Api\Middleware;
+
+use FloCMS\Api\Contracts\MiddlewareInterface;
+use FloCMS\Api\Contracts\RequestHandlerInterface;
+use FloCMS\Core\Http\Request;
+use FloCMS\Core\Http\Response;
+
+/**
+ * Use on a route or group in api/routes.php:
+ *
+ *     $router->get('/path', $handler)->middleware(new {{ class }}());
+ */
+final class {{ class }} implements MiddlewareInterface
+{
+    public function process(Request $request, RequestHandlerInterface $handler): Response
+    {
+        // Before the handler: inspect or reject the request here.
+
+        $response = $handler->handle($request);
+
+        // After the handler: change the response here.
+
+        return $response;
+    }
+}

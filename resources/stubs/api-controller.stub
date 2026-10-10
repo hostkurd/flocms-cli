@@ -1,0 +1,25 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Api\Controllers;
+
+use FloCMS\Api\Controller;
+use FloCMS\Api\OpenApi\Summary;
+use FloCMS\Api\OpenApi\Tag;
+use FloCMS\Core\Http\Request;
+use FloCMS\Core\Http\Response;
+
+/**
+ * Add to api/routes.php:
+ *
+ *     $router->get('/{{ route }}', [{{ class }}::class, 'index'])->name('{{ route }}.index');
+ */
+#[Tag('{{ tag }}')]
+final class {{ class }} extends Controller
+{
+    #[Summary('List {{ route }}')]
+    public function index(Request $request): Response
+    {
+        return $this->success([]);
+    }
+}

@@ -1,0 +1,25 @@
+<?php
+declare(strict_types=1);
+
+namespace FloCMS\Controllers;
+
+use FloCMS\Core\Controller;{{ uses }}
+
+class {{ class }} extends Controller
+{
+    /**
+     * Permission required per action, checked before the action runs.
+     * '*' applies to every action not listed.
+     */
+    protected array $actionPermissions = [
+        '*' => '{{ permission }}.manage',
+    ];
+{{ model }}
+    /**
+     * GET /admin/{{ route }}
+     */
+    public function admin_index(): void
+    {
+        $this->data['title'] = '{{ title }}';
+    }
+}

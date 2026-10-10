@@ -1,0 +1,7 @@
+    /**
+     * GET /{{ url }}
+     */
+    public function {{ action }}(): void
+    {
+        $this->data['title'] = '{{ title }}';
+    }
