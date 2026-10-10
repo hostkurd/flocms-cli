@@ -42,6 +42,33 @@ final class TempProject
         return (string) file_get_contents($this->path($relative));
     }
 
+    /** Use a SQLite database in storage/ (.env DB_TYPE=sqlite). */
+    public function sqlite(string $extraEnv = ''): void
+    {
+        if (!is_dir($this->path('storage'))) {
+            mkdir($this->path('storage'), 0777, true);
+        }
+        $this->write('.env', "APP_ENV=local\nDB_TYPE=sqlite\nDB_NAME=storage/database.sqlite\n" . $extraEnv);
+    }
+
+    /**
+     * Use MySQL/MariaDB from FLO_TEST_MYSQL_* (CI), or null when not set.
+     */
+    public function mysql(string $extraEnv = ''): bool
+    {
+        $host = getenv('FLO_TEST_MYSQL_HOST');
+        if ($host === false || $host === '') {
+            return false;
+        }
+        $env = "APP_ENV=local\nDB_TYPE=mysql\nDB_HOST={$host}\nDB_PORT=" . (getenv('FLO_TEST_MYSQL_PORT') ?: '3306')
+            . "\nDB_NAME=" . (getenv('FLO_TEST_MYSQL_NAME') ?: 'flocms_cli_test')
+            . "\nDB_USERNAME=" . (getenv('FLO_TEST_MYSQL_USER') ?: 'root')
+            . "\nDB_PASSWORD=" . (getenv('FLO_TEST_MYSQL_PASS') ?: '') . "\n";
+        $this->write('.env', $env . $extraEnv);
+
+        return true;
+    }
+
     /** @param array<int, array<string, mixed>> $packages */
     public function installed(array $packages): void
     {

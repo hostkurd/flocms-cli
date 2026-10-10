@@ -12,5 +12,8 @@
             <directory>tests/Integration</directory>
             <directory>tests/Commands</directory>
         </testsuite>
+        <testsuite name="mysql">
+            <directory>tests/Mysql</directory>
+        </testsuite>
     </testsuites>
 </phpunit>

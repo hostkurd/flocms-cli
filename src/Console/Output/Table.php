@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace FloCMS\CLI\Console\Output;
 
 /**
- * A plain ASCII table (safe in every Windows console):
+ * A plain ASCII table (safe in every Windows console). Cell values are
+ * escaped; wrap a value in Styled to keep its style tags.
+ *
  *
  *     +----+-------+
  *     | id | name  |
@@ -69,6 +71,7 @@ final class Table
     private static function cell(mixed $value): string
     {
         return match (true) {
+            $value instanceof Styled => $value->text,
             $value === null => '-',
             $value === true => 'yes',
             $value === false => 'no',

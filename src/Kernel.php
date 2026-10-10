@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace FloCMS\CLI;
 
 use FloCMS\CLI\Commands\App\KeyGenerateCommand;
+use FloCMS\CLI\Commands\Db;
 use FloCMS\CLI\Commands\HelpCommand;
 use FloCMS\CLI\Commands\ListCommand;
 use FloCMS\CLI\Commands\Make;
@@ -134,6 +135,13 @@ final class Kernel
             new Make\MakeModuleCommand(),
             ...Make\DeleteCommand::all(),
             new StubPublishCommand(),
+            new Db\MigrateCommand(),
+            new Db\MigrateStatusCommand(),
+            new Db\MigrateRollbackCommand(),
+            new Db\MigrateFreshCommand(),
+            new Db\DbSeedCommand(),
+            new Db\DbShowCommand(),
+            new Db\DbCheckCommand(),
         ];
     }
 }

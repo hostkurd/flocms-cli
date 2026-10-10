@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace FloCMS\CLI;
 
+use FloCMS\CLI\Database\ConnectionFactory;
+use FloCMS\Core\Database;
 use FloCMS\Core\Env;
 use RuntimeException;
 
@@ -21,6 +23,8 @@ class Project
     private ?array $dotenv = null;
 
     private bool $booted = false;
+
+    private ?Database $database = null;
 
     public function __construct(string $root)
     {
@@ -174,6 +178,26 @@ class Project
         }
 
         return $this->dotenv;
+    }
+
+    /** The project's database (see ConnectionFactory for the .env settings). */
+    public function database(): Database
+    {
+        if ($this->database === null) {
+            $this->database = ConnectionFactory::make($this);
+            // Models used by commands (new UsersModel()) share this connection
+            if (\FloCMS\Core\App::$db === null) {
+                \FloCMS\Core\App::$db = $this->database;
+            }
+        }
+
+        return $this->database;
+    }
+
+    /** Use this connection instead of the .env settings (tests, packages). */
+    public function setDatabase(?Database $database): void
+    {
+        $this->database = $database;
     }
 
     /** Forget cached .env values (after a command changed the file). */
