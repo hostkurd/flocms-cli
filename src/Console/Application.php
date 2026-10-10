@@ -38,6 +38,9 @@ class Application
     /** @var null|\Closure(): list<string> */
     private ?\Closure $headerProvider = null;
 
+    /** @var null|\Closure(): string */
+    private ?\Closure $versionProvider = null;
+
     /**
      * @param resource|null $stdin
      */
@@ -377,7 +380,13 @@ class Application
 
     public function longVersion(): string
     {
-        return trim($this->name . ' ' . $this->version);
+        return $this->versionProvider !== null ? ($this->versionProvider)() : trim($this->name . ' ' . $this->version);
+    }
+
+    /** @param callable(): string $provider the -V / --version line */
+    public function setVersionProvider(callable $provider): void
+    {
+        $this->versionProvider = \Closure::fromCallable($provider);
     }
 
     /**

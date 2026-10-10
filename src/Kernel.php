@@ -11,6 +11,7 @@ use FloCMS\CLI\Console\Command;
 use FloCMS\CLI\Console\Output\Output;
 use FloCMS\CLI\Discovery\CommandLoader;
 use FloCMS\CLI\Discovery\PackageManifest;
+use FloCMS\CLI\Support\Versions;
 
 /**
  * Boots the command kernel for a FloCMS project. The project's root `flo`
@@ -35,7 +36,9 @@ final class Kernel
     public static function boot(string $root, ?Output $output = null, $stdin = null): Application
     {
         $project = Project::fromLauncher($root);
-        $application = new Application('FloCMS CLI', '', $project, $output, $stdin);
+        $application = new Application('FloCMS CLI', Versions::cli(), $project, $output, $stdin);
+        $application->setHeaderProvider(static fn (): array => self::header($project));
+        $application->setVersionProvider(static fn (): string => self::longVersion($project));
 
         foreach (self::builtinCommands() as $command) {
             $application->add($command);
@@ -69,6 +72,42 @@ final class Kernel
     public static function warnings(): array
     {
         return self::$warnings;
+    }
+
+    /**
+     * The top of `php flo list`.
+     *
+     * @return list<string>
+     */
+    public static function header(Project $project): array
+    {
+        $versions = Versions::framework($project);
+        $parts = [];
+        foreach (['core' => 'flocms-core', 'api' => 'flocms-api', 'uploader' => 'flocms-uploader', 'app' => 'app'] as $key => $label) {
+            if (isset($versions[$key])) {
+                $parts[] = $label . ' <comment>' . $versions[$key] . '</comment>';
+            }
+        }
+        $debug = $project->env('APP_DEBUG') === true ? ', <comment>debug on</comment>' : '';
+
+        return array_values(array_filter([
+            '<info>FloCMS CLI</info> <comment>' . Versions::cli() . '</comment>',
+            $parts === [] ? null : 'Framework: ' . implode(', ', $parts),
+            'Environment: <comment>' . ($project->hasEnvFile() || $project->env('APP_ENV') !== null ? $project->environment() : 'no .env file') . '</comment>' . $debug,
+        ]));
+    }
+
+    /** -V / --version */
+    public static function longVersion(Project $project): string
+    {
+        $versions = Versions::framework($project);
+        unset($versions['cli']);
+        $parts = [];
+        foreach ($versions as $label => $version) {
+            $parts[] = $label . ' ' . $version;
+        }
+
+        return 'FloCMS CLI ' . Versions::cli() . ($parts === [] ? '' : ' (' . implode(', ', $parts) . ')');
     }
 
     /** @return list<Command> */

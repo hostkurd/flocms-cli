@@ -86,8 +86,8 @@ class Output
         if ($verbosity > $this->verbosity) {
             return;
         }
-        fwrite($this->stdout, $this->formatter->format($text) . ($newline ? "\n" : ''));
-        fflush($this->stdout);
+        @fwrite($this->stdout, $this->formatter->format($text) . ($newline ? "\n" : ''));
+        @fflush($this->stdout);
     }
 
     public function writeln(string $text = '', int $verbosity = self::NORMAL): void
@@ -98,8 +98,8 @@ class Output
     /** Errors are written even with --quiet. */
     public function error(string $text, bool $newline = true): void
     {
-        fwrite($this->stderr, $this->errorFormatter->format($text) . ($newline ? "\n" : ''));
-        fflush($this->stderr);
+        @fwrite($this->stderr, $this->errorFormatter->format($text) . ($newline ? "\n" : ''));
+        @fflush($this->stderr);
     }
 
     /** Diagnostics (progress, warnings) on STDERR, respecting --quiet. */
