@@ -35,6 +35,9 @@ class Application
 
     private bool $interactive = true;
 
+    /** @var null|\Closure(): list<string> */
+    private ?\Closure $headerProvider = null;
+
     /**
      * @param resource|null $stdin
      */
@@ -86,15 +89,159 @@ class Application
         return $this->aliases;
     }
 
-    /** Find a command by name or alias. */
+    /**
+     * Find a command by name, alias or unambiguous abbreviation
+     * ("mig" for "migrate", "m:st" for "migrate:status").
+     *
+     * @throws CommandNotFoundException with "Did you mean" alternatives
+     */
     public function find(string $name): Command
     {
         $command = $this->commands[$name] ?? $this->commands[$this->aliases[$name] ?? ''] ?? null;
-        if ($command === null) {
-            throw new CommandNotFoundException('Command "' . $name . '" is not defined.');
+        if ($command !== null) {
+            return $command;
         }
 
-        return $command;
+        $matches = $this->abbreviationMatches($name);
+        if (count($matches) === 1) {
+            return $this->commands[$matches[0]];
+        }
+        if (count($matches) > 1) {
+            throw new CommandNotFoundException(
+                'Command "' . $name . '" is ambiguous. Did you mean one of these?' . "\n  " . implode("\n  ", $matches),
+                $matches
+            );
+        }
+
+        $alternatives = $this->alternatives($name);
+        $message = 'Command "' . $name . '" is not defined.';
+        if ($alternatives !== []) {
+            $message .= count($alternatives) === 1
+                ? "\nDid you mean \"" . $alternatives[0] . '"?'
+                : "\nDid you mean one of these?\n  " . implode("\n  ", $alternatives);
+        } else {
+            $message .= "\nRun \"php flo list\" to see all commands.";
+        }
+
+        throw new CommandNotFoundException($message, $alternatives);
+    }
+
+    /**
+     * Commands whose name segments all start with the given segments. Exact
+     * segment-count matches win, so "mig" finds "migrate" even when
+     * "migrate:status" exists.
+     *
+     * @return list<string>
+     */
+    private function abbreviationMatches(string $name): array
+    {
+        $parts = explode(':', $name);
+        if (in_array('', $parts, true)) {
+            return [];
+        }
+        $same = [];
+        $longer = [];
+        foreach ($this->visibleNames() as $candidate) {
+            $candidateParts = explode(':', $candidate);
+            if (count($candidateParts) < count($parts)) {
+                continue;
+            }
+            foreach ($parts as $index => $part) {
+                if (!str_starts_with($candidateParts[$index], $part)) {
+                    continue 2;
+                }
+            }
+            if (count($candidateParts) === count($parts)) {
+                $same[] = $candidate;
+            } else {
+                $longer[] = $candidate;
+            }
+        }
+        $same = array_values(array_unique(array_map(fn (string $n): string => $this->aliases[$n] ?? $n, $same)));
+        if ($same !== []) {
+            return $same;
+        }
+
+        return array_values(array_unique(array_map(fn (string $n): string => $this->aliases[$n] ?? $n, $longer)));
+    }
+
+    /**
+     * Similar command names: small edit distance, or sharing a meaningful
+     * word ("api:create:schema" suggests "api:install-schema").
+     *
+     * @return list<string>
+     */
+    public function alternatives(string $name, int $limit = 5): array
+    {
+        $name = strtolower($name);
+        $words = array_filter(preg_split('/[:\-_]/', $name) ?: [], static fn (string $w): bool => strlen($w) >= 3);
+        $scores = [];
+        foreach ($this->visibleNames() as $candidate) {
+            $distance = levenshtein($name, strtolower($candidate));
+            $threshold = max(2, intdiv(strlen($name), 3));
+            $candidateWords = preg_split('/[:\-_]/', strtolower($candidate)) ?: [];
+            $shared = 0;
+            foreach ($words as $word) {
+                foreach ($candidateWords as $candidateWord) {
+                    if ($candidateWord === $word || (strlen($word) >= 4 && str_starts_with($candidateWord, $word))) {
+                        $shared++;
+                        break;
+                    }
+                }
+            }
+            $namespaceWord = $words === [] ? false : in_array(reset($words), $candidateWords, true);
+            if ($distance <= $threshold || str_contains(strtolower($candidate), $name)) {
+                $scores[$candidate] = $distance;
+            } elseif ($shared > 0 && ($shared >= 2 || !$namespaceWord || count($words) === 1)) {
+                $scores[$candidate] = $distance + 100 - $shared * 50;
+            }
+        }
+        asort($scores);
+        $names = array_map(fn (string $n): string => $this->aliases[$n] ?? $n, array_keys($scores));
+
+        return array_slice(array_values(array_unique($names)), 0, $limit);
+    }
+
+    /** @return list<string> names and aliases of commands that are not hidden */
+    private function visibleNames(): array
+    {
+        $names = [];
+        foreach ($this->commands as $name => $command) {
+            if (!$command->isHidden()) {
+                $names[] = $name;
+            }
+        }
+        foreach ($this->aliases as $alias => $target) {
+            if (isset($this->commands[$target]) && !$this->commands[$target]->isHidden()) {
+                $names[] = $alias;
+            }
+        }
+
+        return $names;
+    }
+
+    /**
+     * Lines shown at the top of `flo list` (name, versions, environment).
+     *
+     * @return list<string>
+     */
+    public function header(): array
+    {
+        if ($this->headerProvider !== null) {
+            return ($this->headerProvider)();
+        }
+        $env = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? getenv('APP_ENV');
+
+        return [
+            '<info>' . $this->name . '</info>' . ($this->version !== '' ? ' <comment>' . $this->version . '</comment>' : ''),
+            'Environment: <comment>' . (is_string($env) && $env !== '' ? $env : 'unknown') . '</comment>',
+        ];
+    }
+
+    /** @param callable(): list<string> $provider */
+    public function setHeaderProvider(callable $provider): void
+    {
+        $this->headerProvider = \Closure::fromCallable($provider);
     }
 
     /**
@@ -158,6 +305,11 @@ class Application
     public function runCommand(Command $command, array $tokens, ?Output $output = null): int
     {
         $output ??= $this->output;
+        if (self::asksForHelp($tokens) && !$command->getDefinition()->hasOption('help')) {
+            (new Descriptor($this))->describeCommand($output, $command);
+
+            return Command::SUCCESS;
+        }
         try {
             $input = ArgvParser::parse($tokens, $command->getDefinition()->merge(self::globalDefinition()), $this->stdin);
             $input->setInteractive($this->interactive);
@@ -189,6 +341,26 @@ class Application
 
             return Command::FAILURE;
         }
+    }
+
+    /**
+     * --help or -h before "--" shows the help, even when required arguments
+     * are missing.
+     *
+     * @param list<string> $tokens
+     */
+    private static function asksForHelp(array $tokens): bool
+    {
+        foreach ($tokens as $token) {
+            if ($token === '--') {
+                return false;
+            }
+            if ($token === '--help' || $token === '-h') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** Exit codes are 0-255; anything else becomes 1. */
@@ -268,12 +440,7 @@ class Application
 
     private function renderHelp(Command $command, Output $output): void
     {
-        $output->writeln('Usage:');
-        $output->writeln('  ' . $this->usage($command));
-        if ($command->getDescription() !== '') {
-            $output->writeln();
-            $output->writeln($command->getDescription());
-        }
+        (new Descriptor($this))->describeCommand($output, $command);
     }
 
     public function getName(): string

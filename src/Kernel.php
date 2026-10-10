@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace FloCMS\CLI;
 
 use FloCMS\CLI\Commands\Legacy\LegacyCommand;
+use FloCMS\CLI\Commands\HelpCommand;
 use FloCMS\CLI\Commands\ListCommand;
 use FloCMS\CLI\Console\Application;
 use FloCMS\CLI\Console\Command;
@@ -75,6 +76,7 @@ final class Kernel
     {
         return [
             new ListCommand(),
+            new HelpCommand(),
             ...LegacyCommand::all(),
         ];
     }
