@@ -34,7 +34,7 @@ final class Kernel
      */
     public static function boot(string $root, ?Output $output = null, $stdin = null): Application
     {
-        $project = new Project($root);
+        $project = Project::fromLauncher($root);
         $application = new Application('FloCMS CLI', '', $project, $output, $stdin);
 
         foreach (self::builtinCommands() as $command) {
