@@ -12,6 +12,7 @@ use FloCMS\CLI\Commands\ListCommand;
 use FloCMS\CLI\Commands\Make;
 use FloCMS\CLI\Commands\Route;
 use FloCMS\CLI\Commands\StubPublishCommand;
+use FloCMS\CLI\Commands\User;
 use FloCMS\CLI\Console\Application;
 use FloCMS\CLI\Console\Command;
 use FloCMS\CLI\Console\Output\Output;
@@ -135,6 +136,11 @@ final class Kernel
             new Cache\OptimizeClearCommand(),
             new Route\RouteListCommand(),
             new Route\PermissionListCommand(),
+            new User\UserCreateCommand(),
+            new User\UserPasswordCommand(),
+            new User\UserRoleCommand(),
+            ...User\UserStatusCommand::all(),
+            new User\UserListCommand(),
             new Make\MakeControllerCommand(),
             new Make\MakeModelCommand(),
             new Make\MakeViewCommand(),
