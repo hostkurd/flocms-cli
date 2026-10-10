@@ -1,2 +1,5 @@
-# Auto detect text files and perform LF normalization
 * text=auto
+*.stub text eol=lf
+/tests export-ignore
+/.github export-ignore
+/phpunit.xml.dist export-ignore
