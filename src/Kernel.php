@@ -5,6 +5,7 @@ namespace FloCMS\CLI;
 
 use FloCMS\CLI\Commands\App;
 use FloCMS\CLI\Commands\App\KeyGenerateCommand;
+use FloCMS\CLI\Commands\Cache;
 use FloCMS\CLI\Commands\Db;
 use FloCMS\CLI\Commands\HelpCommand;
 use FloCMS\CLI\Commands\ListCommand;
@@ -127,6 +128,10 @@ final class Kernel
             new App\DownCommand(),
             new App\UpCommand(),
             new App\EnvCheckCommand(),
+            new Cache\CacheClearCommand(),
+            new Cache\ViewClearCommand(),
+            new Cache\OptimizeCommand(),
+            new Cache\OptimizeClearCommand(),
             new Make\MakeControllerCommand(),
             new Make\MakeModelCommand(),
             new Make\MakeViewCommand(),
