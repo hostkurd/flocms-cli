@@ -14,7 +14,7 @@ class Core{
     /** @var array<string,string> */
     protected $Paths = [];
 
-    public function __construct($command, $Data)
+    public function __construct($command, $Data, ?string $root = null)
     {
         $this->Command = $command;
         $this->Data = $Data;
@@ -26,9 +26,8 @@ class Core{
 
         $this->Colors = new Colors();
 
-        // Centralized paths (relative to the directory where the CLI is executed).
-        // Next step can be "project root detection" instead of getcwd().
-        $root = getcwd();
+        // Centralized paths, relative to the project root.
+        $root = $root ?? getcwd();
         $this->Paths = [
             'root' => $root,
             'controllers' => $root . '/controllers',
