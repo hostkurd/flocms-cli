@@ -9,6 +9,8 @@ use FloCMS\CLI\Help;
  */
 final class Gate
 {
+    public const UPGRADE_URL = 'https://github.com/hostkurd/flocms-cli/blob/main/UPGRADE.md';
+
     private $Command;
     private $AllCommands;
 
@@ -18,7 +20,10 @@ final class Gate
         $this->AllCommands = $jsdata['cli-data']['all-commands'];
     }
 
-    public function Execute(): void{
+    /**
+     * Run the command and return the process exit code.
+     */
+    public function Execute(): int{
         //$colors = new Colors();
         $Help = new Help();
 
@@ -43,14 +48,43 @@ final class Gate
                 case 'delete:view':       echo $Core->DeleteView(); break;
                 case 'delete:route':      echo $Core->DeleteRoute(); break;
                 default:
-                    echo "Command not valid \r\nRun \"php flo --help\" to view available FloCMS Commands.";
-                    break;
+                    fwrite(STDERR, self::UnknownCommandMessage((string) $this->Command[1]));
+                    return 1;
             }
         }else{
             echo "\r\n \r\n";
             echo $Core -> ShowAllCommands();
         }
 
+        return 0;
+    }
+
+    /**
+     * Commands such as api:* and key:generate are handled by newer flo launchers
+     * (the "flo" file in the project root). That file is copied once by
+     * composer create-project and never updated, so an old copy sends them here.
+     */
+    public static function UnknownCommandMessage(string $command): string
+    {
+        $lines = [
+            'Command "' . $command . '" not found.',
+            '',
+            'Your flo launcher is outdated: the "flo" file in your project root comes from an',
+            'older FloCMS version and does not know newer commands. Replace it with the "flo"',
+            'file from FloCMS 1.7 or later, see:',
+            '  ' . self::UPGRADE_URL,
+        ];
+
+        if (str_starts_with($command, 'api:')) {
+            $lines[] = '';
+            $lines[] = 'Until then, run API commands directly:';
+            $lines[] = '  php vendor/bin/flo-api ' . $command;
+        }
+
+        $lines[] = '';
+        $lines[] = 'Run "php flo --help" to view the commands this launcher supports.';
+
+        return implode(PHP_EOL, $lines) . PHP_EOL;
     }
     
 }

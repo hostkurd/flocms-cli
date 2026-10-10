@@ -30,4 +30,4 @@ require $autoloadPath;
 use FloCMS\CLI\Gate;
 
 $gate = new Gate($argv);
-$gate->Execute();
+exit($gate->Execute());
