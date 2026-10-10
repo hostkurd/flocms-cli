@@ -5,6 +5,7 @@ namespace FloCMS\CLI\Tests\Unit;
 
 use FloCMS\CLI\Console\ClosureCommand;
 use FloCMS\CLI\Console\Command;
+use FloCMS\CLI\Console\Prompt;
 use FloCMS\CLI\Console\Testing\CommandTester;
 use PHPUnit\Framework\TestCase;
 
@@ -109,6 +110,15 @@ final class PromptTest extends TestCase
 
         self::assertSame("'s3cret!'\n", $tester->getDisplay());
         self::assertStringNotContainsString('s3cret', $tester->getErrorOutput());
+    }
+
+    public function testWindowsHiddenInputCanPrompt(): void
+    {
+        $command = Prompt::windowsHiddenCommand();
+
+        // Read-Host fails in -NonInteractive mode, so the password prompt was skipped
+        self::assertStringNotContainsString('-NonInteractive', $command);
+        self::assertStringContainsString('Read-Host -AsSecureString', $command);
     }
 
     public function testOutputHelpers(): void
