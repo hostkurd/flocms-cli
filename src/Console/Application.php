@@ -29,6 +29,8 @@ class Application
     /** @var resource|null */
     private $stdin;
 
+    private bool $interactive = true;
+
     /**
      * @param resource|null $stdin
      */
@@ -118,6 +120,7 @@ class Application
         $output ??= $this->output;
         try {
             $input = ArgvParser::parse($tokens, $command->getDefinition(), $this->stdin);
+            $input->setInteractive($this->interactive);
 
             return $command->run($input, $output);
         } catch (InputException $error) {
@@ -150,5 +153,26 @@ class Application
     public function output(): Output
     {
         return $this->output;
+    }
+
+    public function setOutput(Output $output): void
+    {
+        $this->output = $output;
+    }
+
+    /** @param resource|null $stream where prompts read answers from (default STDIN) */
+    public function setInputStream($stream): void
+    {
+        $this->stdin = $stream;
+    }
+
+    public function isInteractive(): bool
+    {
+        return $this->interactive;
+    }
+
+    public function setInteractive(bool $interactive): void
+    {
+        $this->interactive = $interactive;
     }
 }

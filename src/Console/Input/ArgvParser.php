@@ -17,7 +17,16 @@ final class ArgvParser
         $positional = [];
         $options = [];
 
+        $onlyArguments = false;
         foreach ($tokens as $token) {
+            if ($onlyArguments) {
+                $positional[] = $token;
+                continue;
+            }
+            if ($token === '--') {
+                $onlyArguments = true;
+                continue;
+            }
             if (preg_match('/^--([A-Za-z0-9][A-Za-z0-9_-]*)(?:=(.*))?$/s', $token, $matches) === 1) {
                 $name = $matches[1];
                 $option = $definition->getOption($name)

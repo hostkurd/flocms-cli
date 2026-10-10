@@ -55,7 +55,8 @@ final class PackageManifest
         $directories = [];
         foreach ($this->listOf('migrations') as $package => $paths) {
             foreach ($paths as $path) {
-                $directories[$package][] = $this->packages[$package]['path'] . DIRECTORY_SEPARATOR . trim(str_replace('\\', '/', $path), '/');
+                $directories[$package][] = $this->packages[$package]['path'] . DIRECTORY_SEPARATOR
+                    . str_replace('/', DIRECTORY_SEPARATOR, trim(str_replace('\\', '/', $path), '/'));
             }
         }
 

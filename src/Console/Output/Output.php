@@ -37,7 +37,7 @@ class Output
         if ($verbosity > $this->verbosity) {
             return;
         }
-        fwrite($this->stdout, $text . ($newline ? PHP_EOL : ''));
+        fwrite($this->stdout, $text . ($newline ? "\n" : ''));
     }
 
     public function writeln(string $text = '', int $verbosity = self::NORMAL): void
@@ -48,7 +48,7 @@ class Output
     /** Errors are written even with --quiet. */
     public function error(string $text, bool $newline = true): void
     {
-        fwrite($this->stderr, $text . ($newline ? PHP_EOL : ''));
+        fwrite($this->stderr, $text . ($newline ? "\n" : ''));
     }
 
     public function verbosity(): int
